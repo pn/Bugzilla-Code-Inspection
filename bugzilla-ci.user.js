@@ -559,7 +559,7 @@ for(var i=0; i< elements.length; i++) {
         }
         if(trunk_links_r1[branch_path][short_file_path]) {
           trunk_links_r1[branch_path][short_file_path] = Math.min(trunk_links_r1[branch_path][short_file_path], r1_match[1]);
-        } else {
+        } else if(trunk_links_r2[branch_path] !== undefined && trunk_links_r2[branch_path][short_file_path] == undefined) {
           trunk_links_r1[branch_path][short_file_path] = r1_match[1];
         }
       }
@@ -577,14 +577,14 @@ for(var i=0; i< elements.length; i++) {
       }
       r1_match = revision_pattern.exec(url_args);
       if(r1_match) {
-        if(trunk_links_r1[branch_path] == undefined) {
-          trunk_links_r1[branch_path] = [];
+        if(trunk_links_r2[branch_path] == undefined) {
+          trunk_links_r2[branch_path] = [];
         }
-        if(trunk_links_r1[branch_path][short_file_path]) {
-          trunk_links_r1[branch_path][short_file_path] = Math.max(trunk_links_r1[branch_path][short_file_path],
+        if(trunk_links_r2[branch_path][short_file_path]) {
+          trunk_links_r2[branch_path][short_file_path] = Math.max(trunk_links_r2[branch_path][short_file_path],
             r1_match[1]);
         } else {
-          trunk_links_r1[branch_path][short_file_path] = r1_match[1];
+          trunk_links_r2[branch_path][short_file_path] = r1_match[1];
         }
       }
 
@@ -654,9 +654,9 @@ be = document.createElement('b');
 be.appendChild(document.createTextNode('Bug Commit Summary:'));
 e.appendChild(be);
 var first_branch = true;
-for(var branch_path in trunk_links_r1) {
+for(var branch_path in trunk_links_r2) {
   var number_modified_files = 0;
-  for(var i in trunk_links_r1[branch_path]) {
+  for(var i in trunk_links_r2[branch_path]) {
     number_modified_files++;
   }
   e.appendChild(document.createElement('br'));
@@ -680,11 +680,11 @@ for(var branch_path in trunk_links_r1) {
     e.setAttribute('style', 'display: none');
   }
   e.setAttribute('id', 'ci_'+branch_path.replace('/', '_'));
-  for(var i in trunk_links_r1[branch_path]) {
-    var r1_val = trunk_links_r1[branch_path][i];
-    var r2_val;
-    if(trunk_links_r2[branch_path]) {
-        r2_val = trunk_links_r2[branch_path][i];
+  for(var i in trunk_links_r2[branch_path]) {
+    var r2_val = trunk_links_r2[branch_path][i];
+    var r1_val;
+    if(trunk_links_r1[branch_path]) {
+        r1_val = trunk_links_r1[branch_path][i];
     }
     e.appendChild(document.createElement('br'));
     var input = document.createElement('input');
@@ -699,10 +699,10 @@ for(var branch_path in trunk_links_r1) {
     var ae = document.createElement('a');
     var url_args;
     var url;
-    if(r2_val) {
+    if(r1_val) {
       url_args = '?r1='+r1_val+'&r2='+r2_val;
     } else {
-      url_args = '?view=markup&revision='+r1_val;
+      url_args = '?view=markup&revision='+r2_val;
     }
   
     url = ci_code_link[branch_path][i] + url_args;
