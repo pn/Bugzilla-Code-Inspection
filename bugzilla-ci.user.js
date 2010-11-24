@@ -57,6 +57,8 @@ patterns[2] = gen_releases_pat;
 //script configuration end
 //************************
 
+/*global GM_xmlhttpRequest, document, location, alert, window */
+
 var ci_accepted_users = [];
 var ci_comments = [];
 var ci_comments_ext = [];
@@ -272,10 +274,9 @@ if(viewvc_match) {
       onload: function(responseDetails) {
 
         var html = responseDetails.responseText;
-        temp_div = document.createElement('div');
+        var temp_div = document.createElement('div');
         temp_div.innerHTML = html.replace(/<script(.|\s)*?\/script>/g, '');
         gatherCIStats(temp_div);
-        var num_matched = 0;
 
         //find first line where general comments will be anchored
         var first_line = getElementByClassName(document, 'td', 'vc_diff_line_number');
@@ -519,7 +520,7 @@ function arrToObjLiteral(arr) {
 
 var gen; //TODO: add multi generic support
 var release; //TODO: add multi release support
-elements = document.getElementsByTagName('a');
+var elements = document.getElementsByTagName('a');
 for(var i=0; i< elements.length; i++) {
   var match, r1_match;
   if (!(match = viewvc_pattern.exec(elements[i].innerHTML))) {
@@ -548,24 +549,24 @@ for(var i=0; i< elements.length; i++) {
       if(!(file_path.replace(short_file_path, '') in arrToObjLiteral(ci_branch_name))) {
         ci_branch_name.push(file_path.replace(short_file_path, ''));
       }
-      if (short_file_path.match(/\/$/) || short_file_path == '') {
+      if (short_file_path.match(/\/$/) || short_file_path === '') {
         continue;
       }
 
       r1_match = r1_pattern.exec(url_args);
       if(r1_match) {
-        if(trunk_links_r1[branch_path] == undefined) {
+        if(trunk_links_r1[branch_path] === undefined) {
           trunk_links_r1[branch_path] = [];
         }
         if(trunk_links_r1[branch_path][short_file_path]) {
           trunk_links_r1[branch_path][short_file_path] = Math.min(trunk_links_r1[branch_path][short_file_path], r1_match[1]);
-        } else if(trunk_links_r2[branch_path] !== undefined && trunk_links_r2[branch_path][short_file_path] == undefined) {
+        } else if(trunk_links_r2[branch_path] !== undefined && trunk_links_r2[branch_path][short_file_path] === undefined) {
           trunk_links_r1[branch_path][short_file_path] = r1_match[1];
         }
       }
       r1_match = r2_pattern.exec(url_args);
       if(r1_match) {
-        if(trunk_links_r2[branch_path] == undefined) {
+        if(trunk_links_r2[branch_path] === undefined) {
           trunk_links_r2[branch_path] = [];
         }
         if(trunk_links_r2[branch_path][short_file_path]) {
@@ -577,7 +578,7 @@ for(var i=0; i< elements.length; i++) {
       }
       r1_match = revision_pattern.exec(url_args);
       if(r1_match) {
-        if(trunk_links_r2[branch_path] == undefined) {
+        if(trunk_links_r2[branch_path] === undefined) {
           trunk_links_r2[branch_path] = [];
         }
         if(trunk_links_r2[branch_path][short_file_path]) {
@@ -588,7 +589,7 @@ for(var i=0; i< elements.length; i++) {
         }
       }
 
-      if(ci_code_link[branch_path] == undefined) {
+      if(ci_code_link[branch_path] === undefined) {
         ci_code_link[branch_path] = [];
       }
       ci_code_link[branch_path][short_file_path] = absolute_url;
@@ -607,10 +608,8 @@ for(var i=0; i< elements.length; i++) {
   }
 
   function collapse_user(user) {
-    var re = new RegExp(/\bcollapsed\b/);
     for(var comment_id=0; comment_id<1000; comment_id++) {
       var comment = document.getElementById('comment_text_' + comment_id);
-      var link = document.getElementById('comment_link_' + comment_id);
       if(!comment) {
         break;
       }
@@ -623,7 +622,7 @@ for(var i=0; i< elements.length; i++) {
       }
     }
   }
-  
+
   function collapse_viewvc() {
     var re = new RegExp(/Affected files:\n---------------/);
     for(var comment_id=0; comment_id<1000; comment_id++) {
@@ -655,86 +654,92 @@ be.appendChild(document.createTextNode('Bug Commit Summary:'));
 e.appendChild(be);
 var first_branch = true;
 for(var branch_path in trunk_links_r2) {
-  var number_modified_files = 0;
-  for(var i in trunk_links_r2[branch_path]) {
-    number_modified_files++;
-  }
-  e.appendChild(document.createElement('br'));
-  var a = document.createElement('a');
-  a.setAttribute('href', '#');
-  a.setAttribute('onClick', 'setVisible(\''+'ci_'+branch_path.replace('/', '_')+'\');return false;');
-  //a.setAttribute('onClick', 'return false;');
-  a.innerHTML = '*';
-  e.appendChild(a);
-  be = document.createElement('b');
-  be.appendChild(document.createTextNode(' '+branch_path.replace(/\/$/, '')));
-  e.appendChild(be);
-  e.appendChild(document.createTextNode(' - ' + number_modified_files + ' modified file(s):'));
-
-  var e_bak = e;
-  e = document.createElement('span');
-  if(first_branch) {
-    e.setAttribute('style', 'display: inline');
-    first_branch = false;
-  } else {
-    e.setAttribute('style', 'display: none');
-  }
-  e.setAttribute('id', 'ci_'+branch_path.replace('/', '_'));
-  for(var i in trunk_links_r2[branch_path]) {
-    var r2_val = trunk_links_r2[branch_path][i];
-    var r1_val;
-    if(trunk_links_r1[branch_path]) {
-        r1_val = trunk_links_r1[branch_path][i];
+  if(trunk_links_r2.hasOwnProperty(branch_path)) {
+    var number_modified_files = 0;
+    for(var i in trunk_links_r2[branch_path]) {
+      if(trunk_links_r2[branch_path].hasOwnProperty(i)) {
+        number_modified_files++;
+      }
     }
     e.appendChild(document.createElement('br'));
-    var input = document.createElement('input');
-    input.setAttribute('type', 'radio');
-    input.setAttribute('name', 'src_file');
-    input.setAttribute('value', branch_path+i);
-    input.setAttribute('onClick', 'setRevision(\''+(r2_val?r2_val:r1_val)+'\'); setFileName(\''+branch_path+i+'\');');
-    e.appendChild(input);
-  
+    var a = document.createElement('a');
+    a.setAttribute('href', '#');
+    a.setAttribute('onClick', 'setVisible(\''+'ci_'+branch_path.replace('/', '_')+'\');return false;');
+    //a.setAttribute('onClick', 'return false;');
+    a.innerHTML = '*';
+    e.appendChild(a);
     be = document.createElement('b');
-    
-    var ae = document.createElement('a');
-    var url_args;
-    var url;
-    if(r1_val) {
-      url_args = '?r1='+r1_val+'&r2='+r2_val;
+    be.appendChild(document.createTextNode(' '+branch_path.replace(/\/$/, '')));
+    e.appendChild(be);
+    e.appendChild(document.createTextNode(' - ' + number_modified_files + ' modified file(s):'));
+  
+    var e_bak = e;
+    e = document.createElement('span');
+    if(first_branch) {
+      e.setAttribute('style', 'display: inline');
+      first_branch = false;
     } else {
-      url_args = '?view=markup&revision='+r2_val;
+      e.setAttribute('style', 'display: none');
     }
+    e.setAttribute('id', 'ci_'+branch_path.replace('/', '_'));
+    for(var i in trunk_links_r2[branch_path]) {
+      if(trunk_links_r2[branch_path].hasOwnProperty(i)) {
+        var r2_val = trunk_links_r2[branch_path][i];
+        var r1_val;
+        if(trunk_links_r1[branch_path]) {
+            r1_val = trunk_links_r1[branch_path][i];
+        }
+        e.appendChild(document.createElement('br'));
+        var input = document.createElement('input');
+        input.setAttribute('type', 'radio');
+        input.setAttribute('name', 'src_file');
+        input.setAttribute('value', branch_path+i);
+        input.setAttribute('onClick', 'setRevision(\''+(r2_val?r2_val:r1_val)+'\'); setFileName(\''+branch_path+i+'\');');
+        e.appendChild(input);
   
-    url = ci_code_link[branch_path][i] + url_args;
-    ae.setAttribute('href', url);
-    var s = document.createElement('b');
-    var link_html;
-    link_html = '<b>';
-    link_html += i.split('/', 2)[0];
-    link_html += '</b>/';
-    link_html += i.substring(i.indexOf('/')+1);
-    ae.innerHTML = link_html;
+        be = document.createElement('b');
   
-    e.appendChild(ae);
-    if(ci_comments[branch_path+i]) {
-      for(var m=0; m<ci_comments_ext.length; m++) {
-        if(ci_comments_ext[m].is_ci && ci_comments_ext[m].rev == r2_val) {
-          if(ci_comments_ext[m].file === branch_path+i) {
-            e.appendChild(document.createTextNode(' '));
-            var a = document.createElement('a');
-            a.setAttribute('href', url+'#l'+ci_comments_ext[m].line);
-            a.innerHTML = ci_comments_ext[m].line;
-            e.appendChild(a);
-            e.appendChild(document.createTextNode('('));
-            e.appendChild(document.createTextNode(ci_comments_ext[m].num_node.getElementsByTagName('a')[0].innerHTML));
-            e.appendChild(document.createTextNode(')'));
+        var ae = document.createElement('a');
+        var url_args;
+        var url;
+        if(r1_val) {
+          url_args = '?r1='+r1_val+'&r2='+r2_val;
+        } else {
+          url_args = '?view=markup&revision='+r2_val;
+        }
+  
+        url = ci_code_link[branch_path][i] + url_args;
+        ae.setAttribute('href', url);
+        var s = document.createElement('b');
+        var link_html;
+        link_html = '<b>';
+        link_html += i.split('/', 2)[0];
+        link_html += '</b>/';
+        link_html += i.substring(i.indexOf('/')+1);
+        ae.innerHTML = link_html;
+  
+        e.appendChild(ae);
+        if(ci_comments[branch_path+i]) {
+          for(var m=0; m<ci_comments_ext.length; m++) {
+            if(ci_comments_ext[m].is_ci && ci_comments_ext[m].rev == r2_val) {
+              if(ci_comments_ext[m].file === branch_path+i) {
+                e.appendChild(document.createTextNode(' '));
+                var a = document.createElement('a');
+                a.setAttribute('href', url+'#l'+ci_comments_ext[m].line);
+                a.innerHTML = ci_comments_ext[m].line;
+                e.appendChild(a);
+                e.appendChild(document.createTextNode('('));
+                e.appendChild(document.createTextNode(ci_comments_ext[m].num_node.getElementsByTagName('a')[0].innerHTML));
+                e.appendChild(document.createTextNode(')'));
+              }
+            }
           }
         }
       }
     }
+    e_bak.appendChild(e);
+    e = e_bak;
   }
-  e_bak.appendChild(e);
-  e = e_bak;
 }
 e.appendChild(document.createElement('br'));
 var p;
@@ -832,9 +837,9 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 
 if(!is_viewvc && !is_bug_list) {
   document.getElementsByTagName("head")[0].appendChild(scriptElement);
-  
+
   document.getElementsByName('changeform')[0].setAttribute('onSubmit', "return ci_submit()");
-  
+
   p = document.createElement('p');
   //p.appendChild(document.createElement('br'));
   be = document.createElement('b');
@@ -847,7 +852,9 @@ if(!is_viewvc && !is_bug_list) {
     p.appendChild(be);
     var num = 0;
     for (i in ci_accepted_users) {
-      p.appendChild(document.createTextNode((num++>0?', ':'')+i));
+      if(ci_accepted_users.hasOwnProperty(i)) {
+        p.appendChild(document.createTextNode((num++>0?', ':'')+i));
+      }
     }
   }
   p.appendChild(document.createElement('br'));
@@ -860,7 +867,7 @@ if(!is_viewvc && !is_bug_list) {
 
   var to='';
   var to_sel='';
-  cc = document.getElementById("cc");
+  var cc = document.getElementById("cc");
   if (cc) {
     for(var opt=0; opt<cc.options.length; opt++) {
       if (to !== '') {
@@ -877,7 +884,7 @@ if(!is_viewvc && !is_bug_list) {
   }
 
   p = document.createElement('p');
-  ci_email = document.createElement('a');
+  var ci_email = document.createElement('a');
   var title_re = new RegExp('(Bug \\d+) [^ ] (.*)');
   var title = document.title;
   var m = title.match(title_re);
@@ -900,7 +907,7 @@ if(!is_viewvc && !is_bug_list) {
   ci_email.innerHTML = 'Send invitation';
   p.appendChild(ci_email);
   e.appendChild(p);
-  
+
   var opt_div = document.createElement('div');
   var tr = document.createElement('tr');
   var td = document.createElement('td');
@@ -940,7 +947,7 @@ if(!is_viewvc && !is_bug_list) {
   td.appendChild(select);
   tr.appendChild(td);
   e.appendChild(tr);
-  
+
   tr = document.createElement('tr');
   td = document.createElement('td');
   be = document.createElement('b');
@@ -957,7 +964,7 @@ if(!is_viewvc && !is_bug_list) {
   td.appendChild(input);
   tr.appendChild(td);
   e.appendChild(tr);
-  
+
   tr = document.createElement('tr');
   td = document.createElement('td');
   be = document.createElement('b');
@@ -974,7 +981,7 @@ if(!is_viewvc && !is_bug_list) {
   td.appendChild(input);
   tr.appendChild(td);
   e.appendChild(tr);
-  
+
   tr = document.createElement('tr');
   td = document.createElement('td');
   be = document.createElement('b');
