@@ -25,6 +25,8 @@ Features
   for the review ready to be sent. It will contain link to the bug, will be
   addressed to everyone on the CC of the bug and will contain preconfigured
   addresses on CC.
+- Display notification on bugzilla page of new version of the script available
+  and allow to download it.
 
 .. _`Bugzilla Code Inspection`: https://github.com/pn/Bugzilla-Code-Inspection
 .. _Bugzilla: http://www.bugzilla.org
