@@ -603,7 +603,11 @@ for(var i=0; i< elements.length; i++) {
     var link = document.getElementById('comment_link_' + comment_id);
     var re = new RegExp(/\bcollapsed\b/);
     if (!comment.className.match(re)) {
-      window.wrappedJSObject.collapse_comment(link, comment);
+      try {
+        window.wrappedJSObject.collapse_comment(link, comment);
+      } catch (err) {
+        //FIXME: add support for collapsing comments in google chrome
+      }
     }
   }
 
