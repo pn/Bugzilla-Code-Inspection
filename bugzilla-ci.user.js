@@ -766,8 +766,29 @@ for(var i=0; i< els.length; i++) {
 //find updates and warn
 getScriptUpdateVer(script_update_source);
 
+var logged_as = '';
+var header = document.getElementById('header');
+if(header) {
+  var links = header.getElementsByClassName('links');
+  if (links[0]) {
+    var links_children = links[0].children;
+    var links_children_childNodes = links_children[links_children.length-1].childNodes;
+    logged_as = links_children_childNodes[links_children_childNodes.length-1].textContent.replace(new RegExp('\\s*'), '');
+  }
+}
+
+var assignee = '';
+var as = document.getElementById("bz_assignee_edit_container");
+if (as) {
+  assignee = as.getElementsByClassName('email')[0].getAttribute('href').replace('mailto:', '');
+}
+
 var scriptElement = document.createElement('script');
 scriptElement.type = 'text/javascript';
+var cf_inspected_orig = document.getElementById('cf_inspected');
+
+var bug_status_orig = document.getElementById('bug_status');
+var resolution_orig = document.getElementById('resolution');
 
 scriptElement.innerHTML = 'function ci_submit() {  ' +
 '  var ln_re = /^\\d+$/;  ' +
@@ -822,10 +843,24 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 '  case "CI_MAJOR":  ' +
 '  cm_e.value = "--- CI comment severity:major"+fn+rv+ln+" ---\\n\\n"+cm_e.value;  ' +
 '  break;  ' +
-'  case "CI_ACCEPTED":  ' +
+'  case "CI_ACCEPTED": if ("' + assignee + '" === "' + logged_as + '") { alert("Cannot give accept dispostion as author."); return false; } ' +
 '  cm_e.value = "--- CI accepted ---\\n\\n"+cm_e.value;  ' +
 '  break;  ' +
 '  }  ' +
+'  var cf_insepcted = document.getElementById("cf_inspected");' +
+'  if ( "' + cf_inspected_orig.value + '" != cf_insepcted.value && cf_insepcted.value == "true" && "' + assignee + '" === "' + logged_as + '") {' +
+'    alert("Code Inspected flag cannot be set to true by the author!");' +
+'    return false;' +
+'  }' +
+'  var bug_status = document.getElementById("bug_status");' +
+'  var resolution = document.getElementById("resolution");' +
+'  alert(bug_status.value + resolution.value);' +
+'  alert("'+bug_status_orig.value + resolution_orig.value+'");' +
+'  if ((( "' + bug_status_orig.value + '" != bug_status.value && bug_status.value == "RESOLVED" && resolution.value == "FIXED") ' +
+'      || (bug_status.value == "RESOLVED" && "' + resolution_orig.value + '" != resolution.value && resolution.value == "FIXED")) && "' + assignee + '" === "' + logged_as + '" && cf_insepcted.value != "true") {' +
+'    alert("Cannot set RESOLVED/FIXED. Ask moderator to set Code Inspected flag to true after verifying all comments.");' +
+'    return false;' +
+'  }' +
 '  return true;  ' +
 '}  ' +
 '  ' +
@@ -842,7 +877,9 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 if(!is_viewvc && !is_bug_list) {
   document.getElementsByTagName("head")[0].appendChild(scriptElement);
 
-  document.getElementsByName('changeform')[0].setAttribute('onSubmit', "return ci_submit()");
+  if(document.getElementsByName('changeform')[0]) {
+    document.getElementsByName('changeform')[0].setAttribute('onSubmit', "return ci_submit()");
+  }
 
   p = document.createElement('p');
   //p.appendChild(document.createElement('br'));
