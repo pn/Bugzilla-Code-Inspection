@@ -854,8 +854,6 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 '  }' +
 '  var bug_status = document.getElementById("bug_status");' +
 '  var resolution = document.getElementById("resolution");' +
-'  alert(bug_status.value + resolution.value);' +
-'  alert("'+bug_status_orig.value + resolution_orig.value+'");' +
 '  if ((( "' + bug_status_orig.value + '" != bug_status.value && bug_status.value == "RESOLVED" && resolution.value == "FIXED") ' +
 '      || (bug_status.value == "RESOLVED" && "' + resolution_orig.value + '" != resolution.value && resolution.value == "FIXED")) && "' + assignee + '" === "' + logged_as + '" && cf_insepcted.value != "true") {' +
 '    alert("Cannot set RESOLVED/FIXED. Ask moderator to set Code Inspected flag to true after verifying all comments.");' +
