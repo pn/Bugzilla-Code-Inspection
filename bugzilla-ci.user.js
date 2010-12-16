@@ -1037,3 +1037,5 @@ if(!is_viewvc && !is_bug_list) {
   tr.appendChild(td);
   e.appendChild(tr);
 }
+
+// vim: et sw=2 sts=2:
