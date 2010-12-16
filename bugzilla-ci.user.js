@@ -426,7 +426,7 @@ scriptElement.innerHTML = "var ci_comments_ext = [];  " +
 "      var tds = trs[i].getElementsByTagName('td');  " +
 "      for(var j=0; j<tds.length; j++) {  " +
 "        if(tds[j].className.match(bz_ci_td_re)) {  " +
-"          alert('This is stupid workaround for ugly bug somewhere... which requires you to press enter for each bug... sorry');  " +
+"          alert('This is workaround for race condition bug somewhere... which requires you to press enter for each bug... sorry');  " +
 "          gatherCIStatsByURL(trs[i].getElementsByTagName('a')[0].href, tds[j].id);  " +
 "        }  " +
 "      }  " +
