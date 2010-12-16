@@ -850,7 +850,7 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 '  break;  ' +
 '  }  ' +
 '  var cf_insepcted = document.getElementById("cf_inspected");' +
-'  if ( "' + cf_inspected_orig.value + '" != cf_insepcted.value && cf_insepcted.value == "true" && "' + assignee + '" === "' + logged_as + '") {' +
+'  if ( "' + cf_inspected_orig.value + '" != cf_insepcted.value && cf_insepcted.value === "true" && "' + assignee + '" === "' + logged_as + '") {' +
 '    alert("Code Inspected flag cannot be set to true by the author!");' +
 '    return false;' +
 '  }' +
@@ -860,6 +860,9 @@ scriptElement.innerHTML = 'function ci_submit() {  ' +
 '      || (bug_status.value == "RESOLVED" && "' + resolution_orig.value + '" != resolution.value && resolution.value == "FIXED")) && "' + assignee + '" === "' + logged_as + '" && cf_insepcted.value != "true") {' +
 '    alert("Cannot set RESOLVED/FIXED. Ask moderator to set Code Inspected flag to true after verifying all comments.");' +
 '    return false;' +
+'  }' +
+'  if ( "' + bug_status_orig.value + '" != bug_status.value && bug_status.value == "REOPENED" && cf_insepcted.value === "true") { ' +
+'    cf_insepcted.value = "false"; ' +
 '  }' +
 '  return true;  ' +
 '}  ' +
