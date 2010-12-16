@@ -560,7 +560,9 @@ for(var i=0; i< elements.length; i++) {
         }
         if(trunk_links_r1[branch_path][short_file_path]) {
           trunk_links_r1[branch_path][short_file_path] = Math.min(trunk_links_r1[branch_path][short_file_path], r1_match[1]);
-        } else if(trunk_links_r2[branch_path] !== undefined && trunk_links_r2[branch_path][short_file_path] === undefined) {
+        } else if(trunk_links_r2[branch_path] !== undefined && trunk_links_r2[branch_path][short_file_path] !== undefined) {
+          trunk_links_r2[branch_path][short_file_path] = r1_match[1];
+        } else {
           trunk_links_r1[branch_path][short_file_path] = r1_match[1];
         }
       }
