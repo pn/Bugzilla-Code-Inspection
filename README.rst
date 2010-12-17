@@ -48,12 +48,16 @@ Installation
 Versions
 ========
 
+- 0.14:
+   - fix regression for displaying links in summary
+   - reset Code Inspected flag to false if bug reopened
 - 0.13:
    - prevent author from setting Code Inspected flag
    - prevent author from changing bug state to FIXED before CI flag is set
    - fix issue for new file updated with second commit
    - first change to make the script work under Chrome
-- 0.12: first open source release
+- 0.12:
+   -first open source release
 
 Bugs
 ====
